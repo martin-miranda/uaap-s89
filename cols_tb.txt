@@ -1,0 +1,37 @@
+W
+L
+W%
++/-
+MINS
+GP
+PTS
+OFF
+DEF
+REB
+AST
+TO
+STL
+BLK
+STK
+FGM
+FGA
+FG %
+2PM
+2PA
+2P %
+3PM
+3PA
+3P %
+FTM
+FTA
+FT %
+PF
+Fls on:
+SCP
+PIP
+PP
+FBP
+PTO
+STP
+BP
+BL
