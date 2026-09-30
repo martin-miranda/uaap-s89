@@ -55,6 +55,7 @@ with tab1:
     df = df[(df['MINS'] * df['GP']) >= df['QMINS']]
     df = df.drop(labels='QMINS', axis=1)
     df = df.reindex(columns=pb_cols)
+    df = df.sort_values(by='PTS', ascending=False)
     df = df.style.background_gradient(cmap=cm, axis=0).background_gradient(cmap=r_cm, axis=0, subset=['TO','PF']).format("{:.2f}")
     st.write(df)
     st.markdown('*Note: Only qualified players are displayed, which requires an average of at least 8 MPG in all team games played.*')
@@ -63,6 +64,7 @@ with tab1:
         st.header('{0}'.format(team), divider='grey')
         df = pd.read_csv('./per_team/{0}_pg.csv'.format(team), index_col=['TEAM', 'NO.', 'PLAYER'])
         df = df.reindex(columns=pb_cols)
+        df = df.sort_values(by='PTS', ascending=False)
         tcm = sns.dark_palette(color, as_cmap=True)
         r_tcm = sns.dark_palette(color, as_cmap=True, reverse=True)
         df = df.style.background_gradient(cmap=tcm, axis=0).background_gradient(cmap=r_tcm, axis=0, subset=['TO','PF']).format("{:.2f}")
@@ -76,6 +78,7 @@ with tab2:
     df = df[(df['MINS'] * df['GP']) >= df['QMINS']]
     df = df.drop(labels='QMINS', axis=1)
     df = df.reindex(columns=pb_cols)
+    df = df.sort_values(by='PTS', ascending=False)
     df = df.style.background_gradient(cmap=cm, axis=0).background_gradient(cmap=r_cm, axis=0, subset=['TO','PF']).format("{:.2f}")
     st.write(df)
     st.markdown('*Note: Only qualified players are displayed, which requires an average of at least 8 MPG in all team games played.*')
@@ -99,6 +102,7 @@ with tab3:
     df = df[(df['MPG'] * df['GP']) >= df['QMINS']]
     df = df.drop(labels='QMINS', axis=1)
     df = df.reindex(columns=pa_cols)
+    df = df.sort_values(by='SP', ascending=False)
     df = df.style.background_gradient(cmap=cm, axis=0).background_gradient(cmap=r_cm, axis=0, subset=['TOR','hTO%', 'DRtg']).format("{:.2f}")
     st.write(df)
     st.markdown('*Note: Only qualified players are displayed, which requires an average of at least 8 MPG in all team games played.*')
@@ -107,6 +111,7 @@ with tab3:
         st.header('{0}'.format(team), divider='gray')
         df = pd.read_csv('./per_team/{0}_pa.csv'.format(team), index_col=['TEAM', 'NO.', 'PLAYER'])
         df = df.reindex(columns=pa_cols)
+        df = df.sort_values(by='SP', ascending=False)
         tcm = sns.dark_palette(color, as_cmap=True)
         r_tcm = sns.dark_palette(color, as_cmap=True, reverse=True)
         df = df.style.background_gradient(cmap=tcm, axis=0).background_gradient(cmap=r_tcm, axis=0, subset=['TOR','DRtg']).format("{:.2f}")
@@ -144,7 +149,6 @@ with tab4:
         st.write(frozen_df3)
 
 with tab5:
-    """
     st.header('Player Trajectory')
     st.markdown('Use this tab to see the trajectory of a player\'s statistic across his games played, and compare it to the trajectory of the league average.')
     st.markdown('*This page uses the same data as in other tabs. Refer to notes in other tabs if necessary.*')
@@ -158,37 +162,37 @@ with tab5:
             label='Select Player',
             options=df1.index.tolist(),
             index=None,
-            placeholder='Select Player'
+            placeholder='Select Player',
+            key='player_select_basic'
         )
     with col2:
         stat = st.selectbox(
             label='Select Stat',
             options=df1.columns.tolist(),
             index=None,
-            placeholder='Select Stat'
+            placeholder='Select Stat',
+            key='stat_select_basic'
         )
 
     if stat != None and target_player != None:
-        base_directory = './player_stats/'
+        base_directory = './player_stats'
         league_player = 'League'
         player_data = pd.DataFrame(columns=['GP', stat])
         league_data = pd.DataFrame(columns=['GP', stat])
 
-        game_directories = [d for d in os.listdir(base_directory) if d.startswith('./player_stats/player_per_game')]
+        game_directories = [d for d in os.listdir(base_directory) if d.startswith('player_per_game')]
         game_directories.sort()
-        print(game_directories)
-
         for game_dir in game_directories:
             game_directory = os.path.join(base_directory, game_dir)
-            file_path = os.path.join(game_directory, 'player_per_game.csv')
-            df = pd.read_csv(game_dir, index_col=['PLAYER'])
+            file_path = os.path.join(game_directory)
+            df = pd.read_csv(file_path, index_col=['PLAYER'])
             if target_player in df.index:
                 player_game_data = df.loc[target_player, ['GP', stat]]
                 player_data = pd.concat([player_data, player_game_data.to_frame().T])
             if league_player in df.index:
                 league_game_data = df.loc[league_player, ['GP', stat]]
                 league_data = pd.concat([league_data, league_game_data.to_frame().T])
-        player_data = player_data.drop_duplicates(subset='GP', keep='first', inplace=True)
+        player_data = player_data.drop_duplicates(subset='GP', keep='first')
         player_data = player_data.sort_values(by='GP')
         league_data = league_data.drop_duplicates(subset='GP', keep='first')
         league_data = league_data.sort_values(by='GP')
@@ -211,14 +215,16 @@ with tab5:
             label='Select Player',
             options=df3.index.tolist(),
             index=None,
-            placeholder='Select Player'
+            placeholder='Select Player',
+            key='player_select_advanced'
         )
     with col2:
         stat = st.selectbox(
             label='Select Stat',
             options=df3.columns.tolist(),
             index=None,
-            placeholder='Select Stat'
+            placeholder='Select Stat',
+            key='stat_select_advanced'
         )
 
     if stat != None and target_player != None:
@@ -232,7 +238,7 @@ with tab5:
 
         for game_dir in game_directories:
             game_directory = os.path.join(base_directory, game_dir)
-            file_path = os.path.join(game_directory, 'advanced_stats.csv')
+            file_path = os.path.join(game_directory)
             df = pd.read_csv(file_path, index_col=['PLAYER'])
             if target_player in df.index:
                 player_game_data = df.loc[target_player, ['GP', stat]]
@@ -254,7 +260,6 @@ with tab5:
 
         fig.update_layout(xaxis_title='Games Played (GP)', yaxis_title=stat, showlegend=True, template='plotly')
         st.plotly_chart(fig)
-        """
 
 with tab6:
     st.header('All Teams', divider='gray')
@@ -263,6 +268,7 @@ with tab6:
     df['L'] = df['GP'] - df['GW']
     df['W%'] = df['W'] / df['GP']
     df = df.reindex(columns=tb_cols)
+    df = df.sort_values(by='W', ascending=False)
     df = df.style.background_gradient(cmap=cm, axis=0).background_gradient(cmap=r_cm, axis=0, subset=['L','TO','PF']).format("{:.2f}")
     st.write(df)
 
@@ -271,6 +277,7 @@ with tab7:
     df = pd.read_csv('./current_stats/opp_per_game.csv', index_col=['TEAM'])
     df = df.reindex(columns=tb_cols)
     df = df.drop(labels=['W','L','W%','MINS'], axis=1)
+    df = df.sort_values(by='PTS')
     df = df.style.background_gradient(cmap=r_cm, axis=0).background_gradient(cmap=cm, axis=0, subset=['TO','PF']).format("{:.2f}")
     st.write(df)
 
@@ -278,6 +285,7 @@ with tab8:
     st.header('All Teams', divider='gray')
     df = pd.read_csv('./current_stats/team_advanced.csv', index_col=['TEAM'])
     df = df.reindex(columns=ta_cols)
+    df = df.sort_values(by='NET', ascending=False)
     df = df.style.background_gradient(cmap=cm, axis=0).background_gradient(cmap=r_cm, axis=0, subset=['DEF','TOR', 'hTO%', 'HHI','Py-L']).format("{:.2f}")
     st.write(df)
 
