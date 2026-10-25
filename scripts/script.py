@@ -6,7 +6,7 @@ Created on Thu Jan 30 09:26:56 2025
 @author: martinmiranda
 """
 first_game = 1
-last_game = 33
+last_game = 35
 
 import subprocess
 from pathlib import Path
