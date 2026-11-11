@@ -5,8 +5,8 @@ Created on Thu Jan 30 09:26:56 2025
 
 @author: martinmiranda
 """
-first_game = 1
-last_game = 45
+first_game = 46
+last_game = 47
 
 import subprocess
 from pathlib import Path
